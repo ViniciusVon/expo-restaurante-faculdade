@@ -14,18 +14,16 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: Colors[colorScheme ?? 'dark'].tint,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
+        tabBarStyle: {
+          backgroundColor: 'black',
+          borderTopWidth: 0,
+        },
       }}>
+      {/* Tela Home */}
       <Tabs.Screen
         name="index"
         options={{
@@ -33,11 +31,22 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
+
+      {/* Tela Cardápio */}
       <Tabs.Screen
-        name="explore"
+        name="carrinho"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Carrinho',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="list.bullet" color={color} />,
+        }}
+      />
+
+      {/* Tela Resumo da Compra */}
+      <Tabs.Screen
+        name="resumo"
+        options={{
+          title: 'Resumo',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="cart.fill" color={color} />,
         }}
       />
     </Tabs>
