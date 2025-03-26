@@ -8,16 +8,24 @@ export default function Login() {
   const [senha, setSenha] = useState("");
 
   async function handleLogin() {
-    if (email === "admin@restaurante.com" && senha === "123456") {
-      await AsyncStorage.setItem("user", JSON.stringify({ email }));
-      router.replace("/");
+    const clienteSalvo = await AsyncStorage.getItem("cliente");
+
+    if (clienteSalvo) {
+      const cliente = JSON.parse(clienteSalvo);
+
+      if (cliente.email === email && cliente.senha === senha) {
+        await AsyncStorage.setItem("user", JSON.stringify({ email }));
+        router.replace("/");
+      } else {
+        Alert.alert("Erro", "E-mail ou senha inválidos");
+      }
     } else {
-      Alert.alert("Erro", "E-mail ou senha inválidos");
+      Alert.alert("Erro", "Cliente não encontrado. Faça o cadastro.");
     }
   }
 
   function handleCadastro() {
-    router.push("/cadastro"); // Redireciona para a tela de cadastro
+    router.push("/cadastro");
   }
 
   return (

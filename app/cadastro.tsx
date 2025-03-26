@@ -5,14 +5,22 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 
 export default function Cadastro() {
-  const [cliente, setCliente] = useState<Cliente>({ nome: "", email: "", endereco: "" });
+  const [cliente, setCliente] = useState<Cliente>({ nome: "", email: "", endereco: "", senha: "" });
 
   async function handleCadastro() {
-    if (cliente.nome && cliente.email && cliente.endereco) {
+    if (cliente.nome && cliente.email && cliente.endereco && cliente.senha) {
+      const clienteExistente = await AsyncStorage.getItem("cliente");
+      if (clienteExistente) {
+        const parsedCliente = JSON.parse(clienteExistente);
+        if (parsedCliente.email === cliente.email) {
+          Alert.alert("Erro", "Este email já está cadastrado!");
+          return;
+        }
+      }
+
       await AsyncStorage.setItem("cliente", JSON.stringify(cliente));
 
-      Alert.alert("Cadastro", `Cadastro de ${cliente.nome} salvo!`);
-
+      Alert.alert("Cadastro", `Cadastro de ${cliente.nome} salvo!\nE-mail: ${cliente.email}\nSenha: ${cliente.senha}`);
       router.replace("/login");
     } else {
       Alert.alert("Erro", "Por favor, preencha todos os campos.");
@@ -45,6 +53,15 @@ export default function Cadastro() {
         value={cliente.endereco}
         onChangeText={(endereco) => setCliente({ ...cliente, endereco })}
         placeholder="Digite seu endereço"
+      />
+
+      <Text style={styles.label}>Senha:</Text>
+      <TextInput
+        style={styles.input}
+        value={cliente.senha}
+        onChangeText={(senha) => setCliente({ ...cliente, senha })}
+        placeholder="Digite sua senha"
+        secureTextEntry
       />
 
       <Button title="Salvar Cadastro" onPress={handleCadastro} />

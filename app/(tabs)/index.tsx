@@ -1,9 +1,10 @@
 import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ItemCardapio } from "../../types/types";
 import { Asset } from "expo-asset";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 async function handleLogout() {
   await AsyncStorage.removeItem('user');
@@ -21,16 +22,41 @@ const cardapio: ItemCardapio[] = [
 export default function Cardapio() {
   const [carrinho, setCarrinho] = useState<ItemCardapio[]>([]);
 
-  const adicionarAoCarrinho = (item: ItemCardapio) => {
-    setCarrinho([...carrinho, item]);
+  useEffect(() => {
+    const carregarCarrinho = async () => {
+      const carrinhoSalvo = await AsyncStorage.getItem('carrinho');
+      if (carrinhoSalvo) {
+        setCarrinho(JSON.parse(carrinhoSalvo));
+      }
+    };
+    carregarCarrinho();
+  }, []);
+
+  const adicionarAoCarrinho = async (item: ItemCardapio) => {
+    const novoCarrinho = [...carrinho, item];
+    setCarrinho(novoCarrinho);
+
+    // Salva o carrinho atualizado no AsyncStorage
+    await AsyncStorage.setItem('carrinho', JSON.stringify(novoCarrinho));
+
     Alert.alert("Item Adicionado", `${item.nome} foi adicionado ao carrinho!`);
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Sair</Text>
-      </TouchableOpacity>
+      {/* Cabeçalho com o ícone do carrinho e contador */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.push('/resumo')}>
+          <Ionicons name="cart" size={30} color="black" />
+          {/* Contador de itens no carrinho */}
+          <View style={styles.counter}>
+            <Text style={styles.counterText}>{carrinho.length}</Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutText}>Sair</Text>
+        </TouchableOpacity>
+      </View>
 
       <FlatList
         data={cardapio}
@@ -63,9 +89,13 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#fff",
   },
-  logoutButton: {
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 20,
-    alignSelf: 'flex-end',
+  },
+  logoutButton: {
     padding: 10,
     backgroundColor: '#f44336',
     borderRadius: 20,
@@ -118,5 +148,21 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  counter: {
+    position: "absolute",
+    top: -5,
+    right: -5,
+    backgroundColor: "red",
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  counterText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 12,
   },
 });
